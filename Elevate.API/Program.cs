@@ -17,7 +17,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
 {
     string[] methods = { "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" };
-    options.AddPolicy("AllowFrontend", builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader().WithMethods(methods));
+    options.AddPolicy("AllowFrontend", builder => builder.WithOrigins("http://localhost:4200", "https://gentle-moss-058576610.3.azurestaticapps.net").AllowAnyHeader().WithMethods(methods));
 });
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>

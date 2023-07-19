@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Elevate.Data\Elevate.Data.csproj" />
+    <ProjectReference Include="..\Elevate.DTO\Elevate.DTO.csproj" />
+    <ProjectReference Include="..\Elevate.Extentions\Elevate.Extentions.csproj" />
+    <ProjectReference Include="..\Elevate.Interface\Elevate.Interface.csproj" />
+    <ProjectReference Include="..\Elevate.Model\Elevate.Model.csproj" />
+  </ItemGroup>
+
+</Project>

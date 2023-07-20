@@ -1,4 +1,5 @@
 ﻿using Elevate.Model.Data;
+using Elevate.Model.HumanAPI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace Elevate.Interface.HumanAPI
     {
         Task<IReadOnlyList<HeartRateReading>> GetVitals(string accessToken, string vitalName);
         Task ResyncData(string accessToken, string human_id);
+        Task<IReadOnlyList<ActivitySummary>> GetActivitySummary(string accessToken);
     }
 }

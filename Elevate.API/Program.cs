@@ -2,6 +2,7 @@ using Elevate.Data.Identity;
 using Microsoft.EntityFrameworkCore;
 using Elevate.Extentions.Identity;
 using Elevate.Extentions.Extentions;
+using Elevate.Data.HumanAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddCors(options =>
 });
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddDbContext<HumanAPIContext>(options =>
     options.UseSqlServer(connectionString));
 
 var app = builder.Build();

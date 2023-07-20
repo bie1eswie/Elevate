@@ -26,6 +26,36 @@ namespace Elevate.Service.HumanAPI
             _config = config;
             _logger = logger;
         }
+
+        public async Task<IReadOnlyList<ActivitySummary>> GetActivitySummary(string accessToken)
+        {
+            try
+            {
+                var basePath = _config["HumanAPI:DataAPI:apiBase"];
+                using var httpClient = _httpClientFactory.CreateClient();
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                var endpoint = basePath + Constants.GET_ACTIVITY_SUMMARY;
+                var httpResponse = await httpClient.GetAsync(endpoint);
+
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    var result = await httpResponse.Content.ReadFromJsonAsync<IReadOnlyList<ActivitySummary>>();
+                    return result;
+                }
+                else
+                {
+                    var errorMessage = await httpResponse.Content.ReadAsStringAsync();
+                    throw new APIException((int)httpResponse.StatusCode, $"API request failed: {errorMessage}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
         public async Task<IReadOnlyList<HeartRateReading>> GetVitals(string accessToken, string vitalName)
         {
             try
@@ -40,7 +70,8 @@ namespace Elevate.Service.HumanAPI
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    return await httpResponse.Content.ReadFromJsonAsync<IReadOnlyList<HeartRateReading>>();
+                    var result = await httpResponse.Content.ReadFromJsonAsync<IReadOnlyList<HeartRateReading>>();
+                    return result;
                 }
                 else
                 {

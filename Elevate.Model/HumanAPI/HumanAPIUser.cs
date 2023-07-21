@@ -12,9 +12,10 @@ namespace Elevate.Model.HumanAPI
         [Key]
         public string ID { get; set; } = Guid.NewGuid().ToString();
         [Required]
-        public string UserId { get; set; }
+        public string UserId { get; set; } 
         [Required]
-        public string HumanID { get; set; }
+        public string HumanID { get; set; } = string.Empty;
+        public string PublicToken { get; set; } = string.Empty;
 
     }
 }

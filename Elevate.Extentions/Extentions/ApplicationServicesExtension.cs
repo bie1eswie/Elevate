@@ -1,4 +1,5 @@
-﻿using Elevate.Interface.HumanAPI;
+﻿using Elevate.Data.HumanAPI;
+using Elevate.Interface.HumanAPI;
 using Elevate.Interface.Identity;
 using Elevate.Service;
 using Elevate.Service.HumanAPI;
@@ -20,6 +21,7 @@ namespace Elevate.Extentions.Extentions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IHumanAPIService, HumanAPIService>();
             services.AddScoped<IHumanDataAPIService, HumanDataAPIService>();
+            services.AddScoped<IHumanAPIRepository, HumanAPIRepository>();
             return services;
         }
     }

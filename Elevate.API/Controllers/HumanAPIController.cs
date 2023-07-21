@@ -34,5 +34,24 @@ namespace Elevate.API.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("[action]")]
+        public async Task<ActionResult<string>> RequestPublicToken(string email)
+        {
+            try
+            {
+                return await _humanAPIService.RequestPublicToken(email);
+            }
+            catch (APIException ex)
+            {
+                _logger.LogError(ex, ex.Message, ex.StackTrace);
+                return new BadRequestObjectResult(ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message, ex.StackTrace);
+                return new BadRequestObjectResult(new APIException(500, "An error occurred while processing the request."));
+            }
+        }
     }
 }

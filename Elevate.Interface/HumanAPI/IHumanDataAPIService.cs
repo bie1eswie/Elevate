@@ -11,7 +11,7 @@ namespace Elevate.Interface.HumanAPI
     public interface IHumanDataAPIService
     {
         Task<IReadOnlyList<HeartRateReading>> GetVitals(string accessToken, string vitalName);
-        Task ResyncData(string accessToken, string human_id);
+        Task<string> ResyncData(string email);
         Task<IReadOnlyList<ActivitySummary>> GetActivitySummary(string accessToken);
     }
 }

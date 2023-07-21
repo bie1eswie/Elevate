@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Elevate.Interface\Elevate.Interface.csproj" />
     <ProjectReference Include="..\Elevate.Model\Elevate.Model.csproj" />
   </ItemGroup>
 

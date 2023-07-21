@@ -9,6 +9,8 @@ namespace Elevate.Interface.HumanAPI
 {
     public interface IHumanAPIRepository
     {
-        Task<HumanAPIUser> GetHumanAPIUser(string email);
+        Task<HumanAPIUser> GetHumanAPIUser(string userId);
+        Task<HumanAPIUser> AddHumanAPIUser(HumanAPIUser humanAPIUser);
+        Task<HumanAPIUser> UpdateHumanAPIUser(HumanAPIUser humanAPIUser);
     }
 }

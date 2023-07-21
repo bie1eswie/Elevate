@@ -1,4 +1,5 @@
 ﻿using Elevate.DTO.DTOs;
+using Elevate.Interface.HumanAPI;
 using Elevate.Interface.Identity;
 using Elevate.Model.Identity;
 using Elevate.Utilities.Errors;
@@ -14,11 +15,13 @@ namespace Elevate.API.Controllers
         private readonly IUserManagerService _userManagerService;
         private readonly ITokenService _tokenService;
         private readonly ILogger<AccountController> _logger;
-        public AccountController(IUserManagerService userManagerService, ITokenService tokenService, ILogger<AccountController> logger)
+        private readonly IHumanAPIService _humanAPIService;
+        public AccountController(IUserManagerService userManagerService, ITokenService tokenService, ILogger<AccountController> logger, IHumanAPIService humanAPIService)
         {
             _tokenService = tokenService;
             _userManagerService = userManagerService;
             _logger = logger;
+            _humanAPIService = humanAPIService;
         }
 
         [Authorize]
@@ -71,7 +74,8 @@ namespace Elevate.API.Controllers
                 {
                     Email = user.Email,
                     Token = _tokenService.CreateToken(user),
-                    DisplayName = user.DisplayName
+                    DisplayName = user.DisplayName,
+                    PublicToken = await _humanAPIService.RequestPublicToken(user.Email)
                 };
             }
             catch (Exception ex)

@@ -8,7 +8,7 @@ namespace Elevate.Utilities.Helpers
 {
     public static class Constants
     {
-        public const string GET_ACCOUNT_ID = "/v1/human/sources";
+        public const string GET_ACCOUNT_ID = "/sources";
         public const string GET_ACTIVITY_SUMMARY = "/activities/summaries";
         public static Dictionary<string, string> VitalsDataEndPoints = new Dictionary<string, string>
         {

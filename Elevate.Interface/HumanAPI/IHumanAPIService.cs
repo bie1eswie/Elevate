@@ -9,5 +9,6 @@ namespace Elevate.Interface.HumanAPI
     public interface IHumanAPIService
     {
         Task<string> RequestToken(string email);
+        Task<string> RequestPublicToken(string email);
     }
 }

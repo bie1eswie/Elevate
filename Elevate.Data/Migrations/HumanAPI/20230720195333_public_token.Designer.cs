@@ -3,6 +3,7 @@ using Elevate.Data.HumanAPI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Elevate.Data.Migrations.HumanAPI
 {
     [DbContext(typeof(HumanAPIContext))]
-    partial class HumanAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20230720195333_public_token")]
+    partial class public_token
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,6 +34,7 @@ namespace Elevate.Data.Migrations.HumanAPI
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PublicToken")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")

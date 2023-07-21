@@ -11,5 +11,6 @@ namespace Elevate.DTO.DTOs
         public string Email { get; set; } = string.Empty;
         public string DisplayName { get; set; } = string.Empty ;
         public string Token { get; set; } = string.Empty;
+        public string PublicToken { get; set; } = string.Empty ;
     }
 }

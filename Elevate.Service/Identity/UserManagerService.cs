@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Elevate.Interface.HumanAPI;
 
 namespace Elevate.Service.Identity
 {
@@ -15,11 +16,12 @@ namespace Elevate.Service.Identity
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-
-        public UserManagerService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        private readonly IHumanAPIRepository _humanAPIRepository;
+        public UserManagerService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHumanAPIRepository humanAPIRepository)
         {
              _signInManager = signInManager;
             _userManager = userManager;
+             _humanAPIRepository = humanAPIRepository;
         }
 
         public  async Task<bool> CheckEmailExistsAsync(string email)
@@ -34,7 +36,12 @@ namespace Elevate.Service.Identity
 
         public async Task<IdentityResult> CreateUser(AppUser user, string password)
         {
-            return await _userManager.CreateAsync(user, password);
+            var result = await _userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+               await this._humanAPIRepository.AddHumanAPIUser(new Model.HumanAPI.HumanAPIUser() { UserId = user.Id });
+            }
+            return result;
         }
 
         public async Task<AppUser> FindByEmailAsync(string email)

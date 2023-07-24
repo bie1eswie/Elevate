@@ -12,5 +12,6 @@ namespace Elevate.Interface.HumanAPI
         Task<HumanAPIUser> GetHumanAPIUser(string userId);
         Task<HumanAPIUser> AddHumanAPIUser(HumanAPIUser humanAPIUser);
         Task<HumanAPIUser> UpdateHumanAPIUser(HumanAPIUser humanAPIUser);
+        Task<HumanAPIUser> GetHumanAPIUserByHumanID(string humanID);
     }
 }

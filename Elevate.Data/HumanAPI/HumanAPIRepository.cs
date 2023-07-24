@@ -35,5 +35,10 @@ namespace Elevate.Data.HumanAPI
             await this._humanAPIContext.SaveChangesAsync();
             return humanAPIUser;
         }
+        public async Task<HumanAPIUser> GetHumanAPIUserByHumanID(string humanID)
+        {
+            return await _humanAPIContext.HumanAPIUsers.FirstOrDefaultAsync(x => x.HumanID == humanID);
+        }
+
     }
 }

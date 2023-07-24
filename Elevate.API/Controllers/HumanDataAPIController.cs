@@ -53,25 +53,5 @@ namespace Elevate.API.Controllers
                 return new BadRequestObjectResult(new APIException(500, "An error occurred while processing the request."));
             }
         }
-
-        [HttpGet]
-        [Route("[action]")]
-        public async Task<IActionResult> ResyncData(string email)
-        {
-            try
-            {
-                return Ok(await _humanDataAPIService.ResyncData(email));
-            }
-            catch (APIException ex)
-            {
-                _logger.LogError(ex, ex.Message, ex.StackTrace);
-                return new BadRequestObjectResult(ex);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ex.Message, ex.StackTrace);
-                return new BadRequestObjectResult(new APIException(500, "An error occurred while processing the request."));
-            }
-        }
     }
 }

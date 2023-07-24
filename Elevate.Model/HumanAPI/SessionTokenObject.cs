@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace Elevate.Model.HumanAPI
 {
-    public class PublicTokenResponse
+    public class SessionTokenObject
     {
         public string humanId { get; set; } = string.Empty;
-        public string publicToken { get; set; } = string.Empty;
+        public string clientId { get; set; } = string.Empty;
+        public string sessionToken { get; set; } = string.Empty;
+        public string userId { get; set; } = string.Empty;
     }
 }

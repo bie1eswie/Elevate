@@ -22,10 +22,11 @@ namespace Elevate.Service.HumanAPI
         private readonly ILogger<HumanAPIService> _logger;
         private readonly IUserManagerService _userManagerService;
         private readonly IHumanAPIRepository _humanAPIRepository;
-        private readonly string _clientId = string.Empty;
-        private readonly string _clientSecret = string.Empty;
-        private readonly string _accessTokenEndpoint = string.Empty;
-        private readonly string _publicTokenEndpoint = string.Empty;
+
+        private readonly string _clientId;
+        private readonly string _clientSecret;
+        private readonly string _accessTokenEndpoint;
+        private readonly string _publicTokenEndpoint;
 
         public HumanAPIService(
             IHttpClientFactory httpClientFactory,
@@ -39,27 +40,32 @@ namespace Elevate.Service.HumanAPI
             _logger = logger;
             _userManagerService = userManagerService;
             _humanAPIRepository = humanAPIRepository;
+
             _clientId = _config["HumanAPI:Client_Id"];
             _clientSecret = _config["HumanAPI:Client_Secret"];
             _accessTokenEndpoint = _config["HumanAPI:AccessTokenEndpoint"];
             _publicTokenEndpoint = _config["HumanAPI:PublicTokenEndpoint"];
+
+            if (string.IsNullOrEmpty(_clientId) || string.IsNullOrEmpty(_clientSecret) ||
+                string.IsNullOrEmpty(_accessTokenEndpoint) || string.IsNullOrEmpty(_publicTokenEndpoint))
+            {
+                throw new ApplicationException("HumanAPI configuration is incomplete.");
+            }
         }
 
-        public async Task<string> RequestPublicToken(string email)
+        public async Task<string> GetUserAccessToken(SessionTokenObject accessTokenRequest)
         {
             try
             {
-                var clientUserId = (await _userManagerService.FindByEmailAsync(email)).Id;
-                var humanId = (await _humanAPIRepository.GetHumanAPIUser(clientUserId)).HumanID;
-
                 var httpClient = _httpClientFactory.CreateClient();
-                var httpResponse = await httpClient.PostAsJsonAsync(_publicTokenEndpoint, new PublicTokenRequest { clientId = _clientId, clientSecret = _clientSecret, humanId = humanId });
+
+                var httpResponse = await httpClient.PostAsJsonAsync(_accessTokenEndpoint, accessTokenRequest);
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
-                    var result = await httpResponse.Content.ReadFromJsonAsync<PublicTokenResponse>();
-                    await UpdateHumanAPIUserPublicToken(clientUserId, result.publicToken);
-                    return result.publicToken;
+                    var result = await httpResponse.Content.ReadFromJsonAsync<AccessTokenResponse>();
+                    await UpdateHumanAPIUser(result);
+                    return result.AccessToken;
                 }
                 else
                 {
@@ -74,11 +80,35 @@ namespace Elevate.Service.HumanAPI
             }
         }
 
-        public async Task<string> RequestToken(string email)
+        public async Task<string> RequestPublicToken(string email)
         {
             try
             {
-                var clientUserId = (await _userManagerService.FindByEmailAsync(email)).Id;
+                var clientUserId = (await _userManagerService.FindByEmailAsync(email))?.Id;
+                if (string.IsNullOrEmpty(clientUserId))
+                {
+                    throw new InvalidOperationException("User not found.");
+                }
+
+                var humanUser = await _humanAPIRepository.GetHumanAPIUser(clientUserId);
+                return humanUser?.PublicToken ?? string.Empty;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<string> RequestSessionToken(string email)
+        {
+            try
+            {
+                var clientUserId = (await _userManagerService.FindByEmailAsync(email))?.Id;
+                if (string.IsNullOrEmpty(clientUserId))
+                {
+                    throw new InvalidOperationException("User not found.");
+                }
 
                 var httpClient = _httpClientFactory.CreateClient();
                 var requestContent = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -87,7 +117,6 @@ namespace Elevate.Service.HumanAPI
                     { "client_secret", _clientSecret },
                     { "client_user_id", clientUserId },
                     { "client_user_email", email },
-                    { "Content-Type", "application/json" },
                     { "type", "session" }
                 });
 
@@ -98,9 +127,9 @@ namespace Elevate.Service.HumanAPI
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<AccessTokenResponse>();
-                    await UpdateHumanAPIUserHumanID(clientUserId, result.human_id);
-                    return result?.session_token ?? String.Empty;
+                    var result = await response.Content.ReadFromJsonAsync<SessionTokenResponse>();
+                    await UpdateHumanAPIUserHumanID(clientUserId, result.Human_id);
+                    return result?.Session_token ?? string.Empty;
                 }
                 else
                 {
@@ -118,22 +147,33 @@ namespace Elevate.Service.HumanAPI
         private async Task<HumanAPIUser> UpdateHumanAPIUserHumanID(string userId, string human_id)
         {
             var humanUser = await _humanAPIRepository.GetHumanAPIUser(userId);
-            humanUser.HumanID = human_id;
-            return await _humanAPIRepository.UpdateHumanAPIUser(humanUser);
-        }
-
-        private async Task<HumanAPIUser> UpdateHumanAPIUserPublicToken(string userId, string publicToken)
-        {
-            var humanUser = await _humanAPIRepository.GetHumanAPIUser(userId);
-            if (string.IsNullOrEmpty(humanUser.PublicToken))
+            if (humanUser != null)
             {
-                humanUser.PublicToken = publicToken;
+                humanUser.HumanID = human_id;
                 return await _humanAPIRepository.UpdateHumanAPIUser(humanUser);
             }
-            else
+            return null;
+        }
+
+        private async Task<HumanAPIUser> UpdateHumanAPIUser(AccessTokenResponse accessTokenResponse)
+        {
+            var user = await _userManagerService.FindByEmailAsync(accessTokenResponse.ClientUserId);
+            if (user != null)
             {
-                return humanUser;
+                var humanUser = await _humanAPIRepository.GetHumanAPIUser(user.Id);
+                if (humanUser!=null && string.IsNullOrEmpty(humanUser?.AccessToken))
+                {
+                    humanUser.AccessToken = accessTokenResponse.AccessToken;
+                    humanUser.PublicToken = accessTokenResponse.PublicToken;
+                    humanUser.HumanID = accessTokenResponse.HumanId;
+                    return await _humanAPIRepository.UpdateHumanAPIUser(humanUser);
+                }
+                else
+                {
+                    return humanUser;
+                }
             }
+            return null;
         }
     }
 }

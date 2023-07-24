@@ -16,6 +16,7 @@ namespace Elevate.Model.HumanAPI
         [Required]
         public string HumanID { get; set; } = string.Empty;
         public string PublicToken { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
 
     }
 }

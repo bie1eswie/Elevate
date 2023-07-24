@@ -8,8 +8,10 @@ namespace Elevate.Model.HumanAPI
 {
     public class AccessTokenResponse
     {
-        public int expires_in { get; set; }
-        public string human_id { get; set; } = string.Empty;
-        public string session_token { get; set; } = string.Empty;
+        public string ClientId { get; set; } = string.Empty;
+        public string HumanId { get; set; } = string.Empty;
+        public string PublicToken { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
+        public string ClientUserId { get; set; } = string.Empty;
     }
 }

@@ -24,7 +24,8 @@ namespace Elevate.Service.HumanAPI
         private readonly ILogger<HumanDataAPIService> _logger;
         private readonly IUserManagerService _userManagerService;
         private readonly IHumanAPIRepository _humanAPIRepository;
-        private readonly string _dataAPIBase = string.Empty;
+
+        private readonly string _dataAPIBase;
 
         public HumanDataAPIService(
             IHttpClientFactory httpClientFactory,
@@ -39,14 +40,28 @@ namespace Elevate.Service.HumanAPI
             _userManagerService = userManagerService;
             _humanAPIRepository = humanAPIRepository;
             _dataAPIBase = _config["HumanAPI:DataAPI:apiBase"];
+
+            if (string.IsNullOrEmpty(_dataAPIBase))
+            {
+                throw new ApplicationException("HumanAPI configuration is incomplete.");
+            }
         }
 
         public async Task<IReadOnlyList<ActivitySummary>> GetActivitySummary(string email)
         {
             try
             {
-                var clientUserId = (await _userManagerService.FindByEmailAsync(email)).Id;
-                var accessToken = (await _humanAPIRepository.GetHumanAPIUser(clientUserId)).AccessToken;
+                var clientUserId = (await _userManagerService.FindByEmailAsync(email))?.Id;
+                if (string.IsNullOrEmpty(clientUserId))
+                {
+                    throw new InvalidOperationException("User not found.");
+                }
+
+                var accessToken = (await _humanAPIRepository.GetHumanAPIUser(clientUserId))?.AccessToken;
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    throw new InvalidOperationException("Access token not found for the user.");
+                }
 
                 using var httpClient = CreateAuthorizedHttpClient(accessToken);
 
@@ -75,10 +90,20 @@ namespace Elevate.Service.HumanAPI
         {
             try
             {
+                if (string.IsNullOrEmpty(vitalName))
+                {
+                    throw new ArgumentException("Invalid vital name.");
+                }
+
                 using var httpClient = CreateAuthorizedHttpClient(accessToken);
 
-                var endpoint = _dataAPIBase + Constants.VitalsDataEndPoints[vitalName];
-                var httpResponse = await httpClient.GetAsync(endpoint);
+                if (!Constants.VitalsDataEndPoints.TryGetValue(vitalName, out var endpoint))
+                {
+                    throw new ArgumentException("Invalid vital name.");
+                }
+
+                var fullEndpoint = _dataAPIBase + endpoint;
+                var httpResponse = await httpClient.GetAsync(fullEndpoint);
 
                 if (httpResponse.IsSuccessStatusCode)
                 {
@@ -97,12 +122,14 @@ namespace Elevate.Service.HumanAPI
                 throw;
             }
         }
+
         private HttpClient CreateAuthorizedHttpClient(string accessToken)
         {
             var httpClient = _httpClientFactory.CreateClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             return httpClient;
         }
+
         private async Task HandleUnsuccessfulResponse(HttpResponseMessage httpResponse)
         {
             var errorMessage = await httpResponse.Content.ReadAsStringAsync();
